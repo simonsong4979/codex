@@ -4,7 +4,7 @@ export default function Contact() {
       <header className="space-y-2">
         <h1 className="text-3xl font-extrabold tracking-tight">연락</h1>
         <p className="text-sm leading-6 text-zinc-700 dark:text-zinc-200">
-          아래 정보로 연락할 수 있습니다. :contentReference[oaicite:20]{index=20}
+          아래 정보로 연락할 수 있습니다.
         </p>
       </header>
 
@@ -22,7 +22,7 @@ export default function Contact() {
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <h2 className="text-base font-extrabold">전화</h2>
           <p className="mt-3 text-sm text-zinc-700 dark:text-zinc-200">
-            +82-10-7574-4979 :contentReference[oaicite:21]{index=21}
+            +82-10-7574-4979
           </p>
         </div>
       </div>
