@@ -28,7 +28,7 @@ export default function Research() {
       <header className="space-y-2">
         <h1 className="text-3xl font-extrabold tracking-tight">연구 관심</h1>
         <p className="max-w-2xl text-sm leading-6 text-zinc-700 dark:text-zinc-200">
-          CV에 정리된 관심 분야를 사이트용으로 보기 좋게 정리했습니다. :contentReference[oaicite:14]{index=14}
+          CV에 정리된 관심 분야를 사이트용으로 보기 좋게 정리했습니다.
         </p>
       </header>
 
