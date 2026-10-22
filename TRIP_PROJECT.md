@@ -3,8 +3,9 @@
 ## Current state and user preferences
 - User approved a simple Korean travel site, readable light/dark themes, actual place names instead of emotional headings, then requested shared preparation/souvenir lists. Keep mobile UI uncluttered and preserve these choices.
 - Latest feature: four tabs (일정 / 준비물 / 기념품 / 정보), item add/edit/delete/check, quantity, optional owner/store, six-second delete undo. Offline lists are read-only; reconnect reloads server truth. Schedule completion remains per-device.
-- Frontend and Firebase integration are implemented and locally tested. **Production family sharing is NOT connected**: no Firebase project or public web config supplied. User asked whether only they must set up; answered yes, family uses anonymous auth with no signup/login.
-- Next external step: owner creates Spark free Firebase project, enables anonymous Authentication, creates Realtime Database in locked mode, publishes provided rules, supplies public web config `apiKey`, `projectId`, `databaseURL`. No service-account key or password is needed. Guide: `FIREBASE_SETUP.md`.
+- Frontend and Firebase integration are implemented and locally tested. **Production family sharing is NOT verified**. Owner created Spark project `tokyo-family-trip-70b7f`, registered web app, and confirmed Anonymous Authentication enabled. Only owner configures; family uses anonymous auth with no signup/login.
+- All three public settings saved in `tokyo-trip/firebase-config.js`, including owner-supplied database URL `https://tokyo-family-trip-70b7f-default-rtdb.asia-southeast1.firebasedatabase.app`. Analytics/SDK imports are unnecessary. Connected release rebuilt; backend rules and live site verification still pending.
+- Next external step: guide nontechnical owner ONE SMALL STEP AT A TIME through publishing provided Realtime Database rules, then redeploy and verify two devices using the same complete sharing link. No service-account key or password is needed. Guide: `FIREBASE_SETUP.md`.
 - No known public Netlify site URL or hosting account binding. Netlify Free + default netlify.app domain, Firebase Spark, free usage limits apply. Never claim unlimited free use or a live deployment without URL evidence.
 
 ## Repository and delivery
@@ -13,11 +14,11 @@
 - Workspace artifact links do NOT work as verified downloads in this chat. Use actual GitHub HTTPS links after push. Established URL: https://github.com/simonsong4979/codex/raw/refs/heads/tokyo-trip-deploy/releases/tokyo-trip.zip . Shared-list release was reverified over HTTP: ZIP returned 200 with exact SHA256; Firebase setup guide also returned HTTP 200.
 - Project: https://github.com/simonsong4979/codex/tree/tokyo-trip-deploy . Root `netlify.toml` selects base `tokyo-trip`, publish `.`, with tested static-file check command.
 - Source site: `tokyo-trip/`, 17 public files. `releases/` holds ZIP, standalone HTML, SHA256SUMS for GitHub delivery. `/workspace/trip-release/` holds build outputs/screenshots, outside checkout. No source PDF, tools, credentials or internal docs in public ZIP.
-- Current ZIP SHA256: `dc6315640233e7e33333e3153d46b159fbe29934ba61fd9283a4c601e4ad6637`. ZIP integrity and all entries' equality to source verified.
+- Current ZIP SHA256: `6efb191e43fb299a7f42143fb7a5fd60dd18b5c10840a55411cae6e5748be4cc`. After filling public config, rebuilt release, verified ZIP integrity and all 17 entries equal source, reran portable checks (5 passed). Live Firebase rules/sync remain unverified.
 
 ## Files / architecture
 - `itinerary.js`: canonical 4 days / 30 activities / 16 initial preparation items. `index.html`, `styles.css`, `theme.css`, `theme.js`, `app.js`: itinerary, theme, routing, offline/print.
-- `firebase-config.js`: blank PUBLIC web configuration; no private credentials. `shared-lists.js`: dependency-free Firebase REST + SSE, anonymous Auth, token renewal, server timestamps, per-item conditional creation/undo, changed-field PATCH edits, complete nested/multi-location SSE patch application.
+- `firebase-config.js`: complete owner-supplied PUBLIC web configuration; rules publishing/live verification pending, no private credentials. `shared-lists.js`: dependency-free Firebase REST + SSE, anonymous Auth, token renewal, server timestamps, per-item conditional creation/undo, changed-field PATCH edits, complete nested/multi-location SSE patch application.
 - `list-ui.js`, `shared-lists.css`: shared-list forms, edit dialog, undo, status and read-only enforcement. Unconfigured mode is explicitly local; storage-denied mode says current-screen only. Never label localStorage synchronization as cross-device sharing.
 - Shared `?trip=` link has 128-bit random capability ID. Members of the same link can edit. Different links create separate rooms; database root/room enumeration is denied by rules. Existing initialized empty lists are not reseeded.
 - `firebase/database.rules.json`, `firebase.json`: provided database rules/emulator configuration. Root reads/writes denied, anonymous access only for correctly shaped room IDs; required item fields, length/type/range validation; no private service-account backend.
