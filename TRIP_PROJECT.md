@@ -9,8 +9,8 @@
 
 ## Repository and delivery
 - Work in existing `/workspace/codex`, branch `tokyo-trip-deploy`; no worktree. Preserve unrelated original Next.js portfolio and main branch.
-- Git HTTPS proxy can push, although GitHub API calls are forbidden. Previous branch upload was verified at `56ffdf49d4e914c59bdf19bbb693036f810f1234`. Current shared-list update must be committed/pushed before claiming it is on GitHub.
-- Workspace artifact links do NOT work as verified downloads in this chat. Use actual GitHub HTTPS links after push. Established URL: https://github.com/simonsong4979/codex/raw/refs/heads/tokyo-trip-deploy/releases/tokyo-trip.zip . Previously HTTP 200 + ZIP signature + exact SHA verified; reverify after update.
+- Git HTTPS proxy can push, although GitHub API calls are forbidden. Shared-list release `c837b1e40ae617d45d20ae7de738ed45c6e10052` was committed and pushed successfully; git ls-remote confirmed it. Older v3 baseline for upgrade tests is `56ffdf49d4e914c59bdf19bbb693036f810f1234`. Later HEAD may contain memory-only follow-ups.
+- Workspace artifact links do NOT work as verified downloads in this chat. Use actual GitHub HTTPS links after push. Established URL: https://github.com/simonsong4979/codex/raw/refs/heads/tokyo-trip-deploy/releases/tokyo-trip.zip . Shared-list release was reverified over HTTP: ZIP returned 200 with exact SHA256; Firebase setup guide also returned HTTP 200.
 - Project: https://github.com/simonsong4979/codex/tree/tokyo-trip-deploy . Root `netlify.toml` selects base `tokyo-trip`, publish `.`, with tested static-file check command.
 - Source site: `tokyo-trip/`, 17 public files. `releases/` holds ZIP, standalone HTML, SHA256SUMS for GitHub delivery. `/workspace/trip-release/` holds build outputs/screenshots, outside checkout. No source PDF, tools, credentials or internal docs in public ZIP.
 - Current ZIP SHA256: `dc6315640233e7e33333e3153d46b159fbe29934ba61fd9283a4c601e4ad6637`. ZIP integrity and all entries' equality to source verified.
