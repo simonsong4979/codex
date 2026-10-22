@@ -26,7 +26,7 @@ const text = [
   ...checklist.map((group) => `${group.title}\n${group.items.map(([,label]) => `[ ] ${label}`).join('\n')}`)
 ].join('\n\n')+'\n';
 writeFileSync(resolve(site,'itinerary.txt'),text);
-const files = ['index.html','styles.css','theme.css','theme.js','app.js','itinerary.js','sw.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt','_headers'];
+const files = ['index.html','styles.css','theme.css','theme.js','shared-lists.css','firebase-config.js','shared-lists.js','list-ui.js','app.js','itinerary.js','sw.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt','_headers'];
 for (const file of files) copyFileSync(resolve(site,file),resolve(folder,file));
 // Ensure every offline URL exists in the published folder.
 const sw = readFileSync(resolve(site,'sw.js'),'utf8');
@@ -57,6 +57,10 @@ let standalone = readFileSync(resolve(site,'index.html'),'utf8')
   .replace('<link rel="stylesheet" href="./styles.css">',()=>`<style>${inlineCSS}</style>`)
   .replace('<link rel="stylesheet" href="./theme.css">',()=>`<style>${readFileSync(resolve(site,'theme.css'),'utf8')}</style>`)
   .replace('<script src="./theme.js"></script>',()=>`<script>${readFileSync(resolve(site,'theme.js'),'utf8')}</script>`)
+  .replace('<link rel="stylesheet" href="./shared-lists.css">',()=>`<style>${readFileSync(resolve(site,'shared-lists.css'),'utf8')}</style>`)
+  .replace('<script src="./firebase-config.js"></script>',()=>`<script>${readFileSync(resolve(site,'firebase-config.js'),'utf8')}</script>`)
+  .replace('<script src="./shared-lists.js"></script>',()=>`<script>${readFileSync(resolve(site,'shared-lists.js'),'utf8')}</script>`)
+  .replace('<script src="./list-ui.js"></script>',()=>`<script>${readFileSync(resolve(site,'list-ui.js'),'utf8')}</script>`)
   .replace(/\s*<script type="module" src="\.\/app\.js"><\/script>/,'')
   .replace('<a href="./itinerary.txt">텍스트 일정표 보기</a>',()=>`<details><summary>텍스트 일정표 보기</summary><pre>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></details>`)
   .replace('</body>',()=>`<script>${inlineCode}</script>\n</body>`);

@@ -1,8 +1,8 @@
 // Increment VERSION when changing any app-shell file before publishing.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const PREFIX = `tokyo-family-${new URL(self.registration.scope).pathname}-`;
 const CACHE = `${PREFIX}${VERSION}`;
-const SHELL = ['index.html','styles.css','theme.css','theme.js','app.js','itinerary.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt'];
+const SHELL = ['index.html','styles.css','theme.css','theme.js','shared-lists.css','firebase-config.js','shared-lists.js','list-ui.js','app.js','itinerary.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt'];
 
 self.addEventListener('install',(event) => {
   event.waitUntil((async () => {
@@ -23,6 +23,14 @@ self.addEventListener('activate',(event) => {
 self.addEventListener('fetch',(event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
+  if (url.pathname === new URL('firebase-config.js',self.registration.scope).pathname) {
+    event.respondWith((async()=>{
+      const cache=await caches.open(CACHE);
+      try {const response=await fetch(event.request);if(response.ok)await cache.put(event.request,response.clone());return response;}
+      catch {return cache.match(event.request,{ignoreSearch:true});}
+    })());
+    return;
+  }
   if (event.request.mode === 'navigate') {
     event.respondWith((async () => {
       try { return await fetch(event.request); }

@@ -2,4 +2,4 @@
 [build]
   base = "tokyo-trip"
   publish = "."
-  command = "test -s index.html && test -s app.js && test -s theme.css && test -s sw.js"
+  command = "test -s index.html && test -s app.js && test -s theme.css && test -s sw.js && test -s firebase-config.js && test -s shared-lists.js && test -s list-ui.js"

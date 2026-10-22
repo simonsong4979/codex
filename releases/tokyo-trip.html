@@ -194,6 +194,393 @@ progress::-moz-progress-bar { background:var(--green); }
   html,body { background:white!important; color:#111!important; }
 }
 </style>
+  <style>.mobile-nav{grid-template-columns:repeat(4,1fr)}
+.list-status{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 14px;padding:12px 14px;border-radius:10px;background:var(--soft);color:var(--muted);font-size:11px;line-height:1.7}
+.list-status [data-state="connected"]{color:var(--green);font-weight:650}
+.list-status [data-state="error"]{color:var(--warning-ink);background:var(--warning-bg);padding:4px 7px;border-radius:5px}
+.list-status button{color:var(--green);font-size:11px;text-decoration:underline;white-space:nowrap;min-height:32px}
+.list-add{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:16px;margin:16px 0}
+.list-add-main{display:flex;gap:8px;align-items:flex-end}
+.list-add-main label{flex:1;min-width:0}
+.list-add label,.list-modal label{font-size:11px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:7px;line-height:1.6}
+.list-add input,.list-modal input{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:11px 12px;min-height:44px;width:100%;font-size:16px;font-weight:400}
+.list-add input::placeholder{color:var(--muted);opacity:1}
+.list-add input:disabled{opacity:.65}
+.list-add-main button,.list-modal .save-button{background:var(--selected);color:var(--selected-ink);border:1px solid var(--selected);min-height:44px;white-space:nowrap}
+.list-options{margin-top:12px;color:var(--muted);font-size:11px}
+.list-options summary{cursor:pointer;padding:5px 0;min-height:30px}
+.list-extra-fields{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;margin-top:12px}
+.list-extra-fields label{min-width:0}
+.shared-items{display:grid;gap:9px;margin-top:18px}
+.shared-item{display:flex;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:13px 12px}
+.shared-item-check{display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer;min-height:36px}
+.shared-item-check input{width:20px;height:20px;flex-shrink:0;accent-color:var(--selected);cursor:pointer}
+.shared-item-check strong{display:block;font-size:13px;font-weight:650;line-height:1.75;overflow-wrap:anywhere}
+.shared-item-check small{display:block;color:var(--muted);font-size:11px;line-height:1.7;margin-top:3px;overflow-wrap:anywhere}
+.shared-item.done strong{color:var(--muted);text-decoration:line-through}
+.shared-item-actions{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.shared-item-actions button{width:34px;height:36px;display:grid;place-items:center;color:var(--muted);border-radius:7px}
+.shared-item-actions button:hover{background:var(--hover);color:var(--ink)}
+.shared-item-actions .icon{width:16px;height:16px}
+.list-empty{padding:32px 20px;text-align:center;background:var(--soft);border:1px dashed var(--line);border-radius:13px;color:var(--muted);font-size:12px;line-height:1.9}
+.list-modal{border:1px solid var(--line);border-radius:18px;padding:24px;background:var(--paper);color:var(--ink);width:min(92vw,430px);max-height:85dvh;overflow:auto}
+.list-modal::backdrop{background:#0008}
+.list-modal h3{font-size:18px;margin-bottom:20px}
+.list-modal label+label{margin-top:15px}
+.list-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+.list-modal-message{color:var(--warning-ink);font-size:11px;line-height:1.8;margin-top:12px}
+.list-undo{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);max-width:92vw;background:var(--selected);color:var(--selected-ink);border-radius:12px;box-shadow:0 4px 24px #0003;z-index:25;padding:12px 15px;display:flex;align-items:center;gap:16px;font-size:12px;line-height:1.6}
+.list-undo>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px}
+.list-undo button{min-height:32px;font-weight:700;text-decoration:underline;white-space:nowrap;color:inherit}
+.list-readonly-note{font-size:10px;line-height:1.8;color:var(--muted);margin-bottom:12px}
+@media(max-width:760px){.list-undo{bottom:88px}.shared-item{padding:12px 10px}.shared-item-check{gap:10px}.shared-item-check strong{font-size:12px}.shared-item-actions button{width:32px}.desktop-nav{gap:20px}.list-add{padding:14px}.list-modal{padding:21px}}
+@media(min-width:761px){.mobile-nav{display:none}}
+</style>
+  <script>// Firebase console → Project settings → Your apps → Web app configuration.
+// These are public web-app settings, NOT service-account/private credentials.
+// Also enable Anonymous Authentication and publish firebase/database.rules.json.
+window.TOKYO_FIREBASE = {
+  apiKey: '',
+  projectId: '',
+  databaseURL: ''
+};
+</script>
+  <script>// Dependency-free Firebase REST/SSE client. List cache is for reading offline;
+// writes always require a live connection, and never silently become local edits.
+// v3 installations cache older app.js. This new asset upgrades the page after
+// the new worker takes control, without discarding an in-progress form.
+if (document.documentElement.dataset.mode!=='portable') {
+  try {
+    const previous=navigator.serviceWorker?.controller;
+    if(previous) navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(navigator.serviceWorker.controller===previous || window.tripUpgradeReloading)return;
+      const dirty=document.querySelector('dialog[open]') || [...document.querySelectorAll('input:not([type=checkbox]):not([type=hidden])')].some(input=>input.value!==input.defaultValue) || document.activeElement?.matches('input,textarea,select');
+      if(dirty) {const note=document.querySelector('#toast');if(note){note.textContent='새 버전이 준비됐어요. 입력 내용을 저장한 뒤 새로고침해 주세요.';note.classList.add('visible');}return;}
+      window.tripUpgradeReloading=true;location.reload();
+    });
+  } catch { /* Sandboxed previews may prohibit service worker access. */ }
+}
+window.createTripLists = function ({seed,legacyChecked=[],onChange}) {
+  const config = window.TOKYO_FIREBASE || {};
+  const portable = document.documentElement.dataset.mode === 'portable';
+  const configured = !portable && Boolean(config.apiKey && config.projectId && config.databaseURL);
+  const safeRead = (key,fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
+  let storageOK = true;
+  const safeWrite = (key,value) => { try { localStorage.setItem(key,JSON.stringify(value)); } catch { storageOK=false; } };
+  const random = () => Array.from(crypto.getRandomValues(new Uint8Array(16)),(n)=>n.toString(16).padStart(2,'0')).join('');
+  const url = new URL(location.href);
+  const requested = url.searchParams.get('trip');
+  const remembered = safeRead('tokyo-family-room',null);
+  const room = /^[a-f0-9]{32}$/.test(requested || '') ? requested : /^[a-f0-9]{32}$/.test(remembered || '') ? remembered : random();
+  safeWrite('tokyo-family-room',room);
+  if (configured) { url.searchParams.set('trip',room); try { history.replaceState(null,'',url); } catch { /* read-only preview */ } }
+  const cacheKey = `tokyo-family-items-${configured ? config.projectId : 'local'}-${room}`;
+  const cache = safeRead(cacheKey,null);
+  const defaults = Object.fromEntries(seed.map(([id,name],index)=>[id,{name,kind:'prepare',quantity:1,owner:'',place:'',done:legacyChecked.includes(id),createdAt:Date.now()+index,updatedAt:Date.now()+index}]));
+  let items = cache && typeof cache === 'object' && !Array.isArray(cache) ? cache : configured ? {} : defaults;
+  let status = configured ? 'connecting' : 'local';
+  let busy = false;
+  let source;
+  let auth;
+  let refreshTimer;
+  let connecting;
+  let revision = 0;
+  const offline = () => !navigator.onLine;
+  const writable = () => !offline() && !busy && (status==='connected' || !configured);
+  const emit = () => { revision++; onChange?.({items,configured,status,busy,writable:writable(),storageOK,room,revision}); };
+  const save = () => { safeWrite(cacheKey,items); emit(); };
+
+  async function fetchTimed(url,options) {
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    try {return await fetch(url,{...options,signal:controller.signal});}
+    finally {clearTimeout(timer);}
+  }
+
+  let database = String(config.databaseURL || '').replace(/\/$/,'');
+  let authBase = 'https://identitytoolkit.googleapis.com/v1';
+  let refreshBase = 'https://securetoken.googleapis.com/v1';
+  if (configured) {
+    const endpoint = new URL(database);
+    const local = ['127.0.0.1','localhost'].includes(location.hostname);
+    if (local && config.emulators) {
+      if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(config.emulators.auth) || !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(config.emulators.database)) throw new Error('Invalid emulator endpoint');
+      authBase = `${config.emulators.auth}/identitytoolkit.googleapis.com/v1`;
+      refreshBase = `${config.emulators.auth}/securetoken.googleapis.com/v1`;
+      database = `${config.emulators.database}?ns=${encodeURIComponent(config.projectId+'-default-rtdb')}`;
+    } else if (endpoint.protocol!=='https:' || !/\.(firebaseio\.com|firebasedatabase\.app)$/.test(endpoint.hostname) || endpoint.username || endpoint.password || endpoint.pathname!=='/' || endpoint.search) {
+      throw new Error('Invalid Firebase database URL');
+    }
+  }
+
+  async function authenticate() {
+    const key = `tokyo-firebase-auth-${config.projectId}`;
+    const stored = auth || safeRead(key,null);
+    if (stored?.idToken && stored.expiresAt>Date.now()+60000) { auth=stored; scheduleRefresh(); return; }
+    let response;
+    if (stored?.refreshToken) {
+      response = await fetchTimed(`${refreshBase}/token?key=${encodeURIComponent(config.apiKey)}`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',refresh_token:stored.refreshToken})});
+    }
+    if (!response?.ok) response = await fetchTimed(`${authBase}/accounts:signUp?key=${encodeURIComponent(config.apiKey)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({returnSecureToken:true})});
+    if (!response.ok) throw new Error('anonymous-auth');
+    const data = await response.json();
+    auth = {idToken:data.idToken || data.id_token,refreshToken:data.refreshToken || data.refresh_token,expiresAt:Date.now()+Number(data.expiresIn || data.expires_in || 3600)*1000};
+    safeWrite(key,auth);
+    scheduleRefresh();
+  }
+
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer);
+    refreshTimer=setTimeout(()=>connect(),Math.max(1000,auth.expiresAt-Date.now()-90000));
+  }
+
+  function endpoint(path='') {
+    const base = new URL(database);
+    base.pathname = `/trips/${room}${path}.json`;
+    base.searchParams.set('auth',auth.idToken);
+    return base.href;
+  }
+
+  async function request(path,method='GET',value,conditional=false) {
+    const headers = {'Content-Type':'application/json'};
+    if (conditional) headers['if-match']='null_etag';
+    const response = await fetchTimed(endpoint(path),{method,headers,body:value===undefined ? undefined : JSON.stringify(value),cache:'no-store'});
+    if (!response.ok) throw new Error(response.status===401 || response.status===403 ? 'permission' : 'network');
+    return response.json();
+  }
+
+  function applyAt(path,value) {
+    const keys=path.split('/').filter(Boolean);
+    if(keys.some(key=>['__proto__','prototype','constructor'].includes(key)))throw new Error('invalid path');
+    if(!keys.length){items=value || {};return;}
+    let node=items;
+    for(const key of keys.slice(0,-1)) {
+      if(!node[key] || typeof node[key]!=='object')node[key]={};
+      node=node[key];
+    }
+    if(value===null)delete node[keys[keys.length-1]];else node[keys[keys.length-1]]=value;
+  }
+
+  function streamUpdate(event,patch) {
+    try {
+      const update=JSON.parse(event.data);
+      if(patch)for(const [key,value] of Object.entries(update.data || {}))applyAt(update.path+'/'+key,value);
+      else applyAt(update.path,update.data);
+      status='connected';save();
+    }catch{status='error';emit();}
+  }
+
+  async function connect() {
+    if (!configured) { emit(); return; }
+    if (offline()) { status='offline'; emit(); return; }
+    if (connecting) return connecting;
+    connecting = (async()=>{
+      source?.close(); status='connecting'; emit();
+      try {
+        await authenticate();
+        let snapshot = await request();
+        if (!snapshot) {
+          const timestamp = {'.sv':'timestamp'};
+          const initial = Object.fromEntries(seed.map(([id,name])=>[id,{name,kind:'prepare',quantity:1,owner:'',place:'',done:legacyChecked.includes(id),createdAt:timestamp,updatedAt:timestamp}]));
+          try { await request('','PUT',{version:1,items:initial},true); }
+          catch (error) { if (!(await request())?.version) throw error; }
+          snapshot = await request();
+        }
+        if (snapshot.version!==1) throw new Error('schema');
+        items=snapshot.items || {}; save();
+        source = new EventSource(endpoint('/items'));
+        source.addEventListener('put',(event)=>streamUpdate(event,false));
+        source.addEventListener('patch',(event)=>streamUpdate(event,true));
+        source.addEventListener('auth_revoked',()=>{source.close();auth=null;status='error';emit();});
+        source.addEventListener('cancel',()=>{source.close();status='error';emit();});
+        source.onerror=()=>{status=offline() ? 'offline' : 'reconnecting';emit();};
+      } catch { status='error';emit(); }
+      finally { connecting=null; }
+    })();
+    return connecting;
+  }
+
+  async function write(operation) {
+    if (!writable()) throw new Error(offline() ? '인터넷 연결 후 수정할 수 있어요.' : '가족 공유 연결을 확인한 후 다시 시도해 주세요.');
+    busy=true; emit();
+    try { return await operation(); }
+    catch { throw new Error('저장하지 못했어요. 연결 상태와 공유 설정을 확인해 주세요.'); }
+    finally { busy=false; emit(); }
+  }
+
+  function clean(fields) {
+    const name=String(fields.name || '').trim();
+    const quantity=Number(fields.quantity);
+    const owner=String(fields.owner || '').trim();
+    const place=String(fields.place || '').trim();
+    if(!name || name.length>120 || !Number.isInteger(quantity) || quantity<1 || quantity>99 || owner.length>40 || place.length>100) throw new Error('품목명과 수량(1–99)을 확인해 주세요.');
+    return {name,quantity,owner,place};
+  }
+
+  window.addEventListener('offline',()=>{source?.close();status=configured ? 'offline' : 'local';emit();});
+  window.addEventListener('online',()=>{if(configured) connect(); else emit();});
+  window.addEventListener('storage',(event)=>{if(!configured && event.key===cacheKey) {const next=safeRead(cacheKey,{});if(next && typeof next==='object' && !Array.isArray(next)){items=next;emit();}}});
+
+  return {
+    room,configured,start:connect,reconnect:connect,
+    snapshot:()=>({items,configured,status,busy,writable:writable(),storageOK,room,revision}),
+    add(kind,fields) {
+      const value={...clean(fields),kind,done:false};
+      if(!['prepare','souvenirs'].includes(kind)) throw new Error('Invalid kind');
+      if(Object.keys(items).length>=300) throw new Error('목록은 합계 300개까지 추가할 수 있어요.');
+      const id='item-'+random();
+      return write(async()=>{
+        if(configured) {const ts={'.sv':'timestamp'};await request('/items/'+id,'PUT',{...value,createdAt:ts,updatedAt:ts},true);}
+        else {items[id]={...value,createdAt:Date.now(),updatedAt:Date.now()};save();}
+        return id;
+      });
+    },
+    edit(id,fields,baseline=items[id]) {
+      const value=clean(fields);
+      if(!items[id]) return Promise.reject(new Error('이미 삭제된 항목이에요.'));
+      const changed=Object.fromEntries(Object.entries(value).filter(([key,entry])=>baseline?.[key]!==entry));
+      if(!Object.keys(changed).length)return Promise.resolve();
+      return write(async()=>{if(configured) await request('/items/'+id,'PATCH',{...changed,updatedAt:{'.sv':'timestamp'}});else {items[id]={...items[id],...changed,updatedAt:Date.now()};save();}});
+    },
+    toggle(id,done) {
+      if(!items[id]) return Promise.reject(new Error('이미 삭제된 항목이에요.'));
+      return write(async()=>{if(configured) await request('/items/'+id,'PATCH',{done,updatedAt:{'.sv':'timestamp'}});else {items[id]={...items[id],done,updatedAt:Date.now()};save();}});
+    },
+    remove(id) {
+      if(!items[id]) return Promise.reject(new Error('이미 삭제된 항목이에요.'));
+      const value={...items[id]};
+      return write(async()=>{if(configured) await request('/items/'+id,'DELETE');else {delete items[id];save();}return {id,value};});
+    },
+    restore({id,value}) {
+      return write(async()=>{if(configured) await request('/items/'+id,'PUT',{...value,updatedAt:{'.sv':'timestamp'}},true);else {if(items[id]) throw new Error('이미 복구된 항목이에요.');items[id]={...value,updatedAt:Date.now()};save();}});
+    }
+  };
+};
+</script>
+  <script>window.mountTripLists = function ({seed,legacyChecked,toast,icon}) {
+  const $=(selector)=>document.querySelector(selector);
+  const escape=(value)=>String(value ?? '').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let store;
+  let snapshot={items:{},configured:false,status:'local',writable:false,storageOK:true};
+  let editId;
+  let editBaseline;
+  let lastDeleted;
+  let undoTimer;
+  const labels={prepare:'준비물',souvenirs:'기념품'};
+
+  function statusText() {
+    if(!navigator.onLine) return '오프라인 · 저장된 목록 보기';
+    if(!snapshot.configured) return snapshot.storageOK ? '이 기기에만 저장 · 가족 공유 연결 전' : '현재 화면에서만 유지 · 브라우저 저장 제한';
+    return {connecting:'가족 목록 연결 중',connected:'가족과 실시간 공유 중',reconnecting:'연결 복구 중 · 수정은 잠시 대기',offline:'오프라인 · 저장된 목록 보기',error:'공유 연결 실패 · 다시 연결해 주세요'}[snapshot.status] || '공유 연결 확인 필요';
+  }
+
+  function render() {
+    for(const kind of ['prepare','souvenirs']) {
+      const rows=Object.entries(snapshot.items).filter(([,item])=>item && item.kind===kind).sort((a,b)=>(a[1].createdAt-b[1].createdAt) || a[0].localeCompare(b[0]));
+      const count=rows.filter(([,item])=>item.done).length;
+      const status=$(`#${kind}-sync-status`);
+      if(status.textContent!==statusText()) status.textContent=statusText();
+      status.dataset.state=snapshot.configured ? snapshot.status : 'local';
+      const countEl=$(kind==='prepare' ? '#checklist-count' : '#souvenir-count');
+      countEl.textContent=`${count} / ${rows.length}`;
+      const progress=$(kind==='prepare' ? '#checklist-progress' : '#souvenir-progress');
+      progress.max=Math.max(1,rows.length);progress.value=count;
+      progress.setAttribute('aria-label',`${rows.length}개 중 ${count}개 ${kind==='prepare' ? '준비' : '구매'} 완료`);
+      if(kind==='prepare') $('#side-check-count').textContent=`${rows.length}개 중 ${count}개 준비 완료`;
+      const list=$(kind==='prepare' ? '#checklist' : '#souvenir-list');
+      const focused=document.activeElement;
+      const focusedId=focused?.closest('[data-list-id]')?.dataset.listId;
+      const focusedAction=focused?.dataset.listAction;
+      list.innerHTML=rows.length ? rows.map(([id,item])=>{
+        const detail=[item.quantity>1 ? `수량 ${item.quantity}` : '',kind==='prepare' ? item.owner : item.place].filter(Boolean).map(escape).join(' · ');
+        return `<article class="shared-item ${item.done ? 'done' : ''}" data-list-id="${escape(id)}"><label class="shared-item-check"><input type="checkbox" data-list-action="toggle" ${kind==='prepare' ? `data-check="${escape(id)}"` : ''} aria-label="${escape(item.name)} ${kind==='prepare' ? '준비' : '구매'} 완료" ${item.done ? 'checked' : ''} ${snapshot.writable ? '' : 'disabled'}><span><strong>${escape(item.name)}</strong>${detail ? `<small>${detail}</small>` : ''}</span></label><div class="shared-item-actions"><button type="button" data-list-action="edit" aria-label="${escape(item.name)} 수정" ${snapshot.writable ? '' : 'disabled'}>${icon('edit')}</button><button type="button" data-list-action="delete" aria-label="${escape(item.name)} 삭제" ${snapshot.writable ? '' : 'disabled'}>${icon('trash')}</button></div></article>`;
+      }).join('') : `<p class="list-empty">${labels[kind]} 항목이 없습니다.<br>위에서 품목을 추가해 주세요.</p>`;
+      if(focusedId && focusedAction && !$('#item-edit-dialog').open) {
+        const row=[...list.querySelectorAll('[data-list-id]')].find((el)=>el.dataset.listId===focusedId);
+        row?.querySelector(`[data-list-action="${focusedAction}"]`)?.focus({preventScroll:true});
+      }
+      $(`#${kind}-add`).querySelectorAll('input,button').forEach((el)=>{el.disabled=!snapshot.writable;});
+      $(`#${kind}-retry`).hidden=!snapshot.configured || !['error','reconnecting'].includes(snapshot.status) || !navigator.onLine;
+    }
+    $('#storage-note').textContent=snapshot.configured
+      ? '같은 공유 링크로 접속한 가족에게 목록 변경이 반영됩니다. 인터넷이 끊기면 저장된 목록만 볼 수 있어요.'
+      : snapshot.storageOK ? '가족 공유 연결 전에는 이 브라우저에만 저장됩니다. 여행 일정의 완료 표시는 기기별로 유지됩니다.' : '브라우저 저장이 제한되어 현재 화면에서만 유지됩니다. 가족 공유는 아직 연결되지 않았어요.';
+    const editing=snapshot.items[editId];
+    $('#edit-save').disabled=!snapshot.writable || !editing;
+    $('#edit-message').textContent=editId && !editing ? '다른 사용자가 이 항목을 삭제했어요. 닫고 목록을 확인해 주세요.' : !snapshot.writable ? '인터넷·공유 연결 후 저장할 수 있어요.' : '';
+    $('#list-undo-button').disabled=!snapshot.writable;
+  }
+
+  for(const kind of ['prepare','souvenirs']) {
+    const form=$(`#${kind}-add`);
+    form.addEventListener('submit',async(event)=>{
+      event.preventDefault();
+      const fields=Object.fromEntries(new FormData(form));
+      try {await store.add(kind,fields);form.reset();form.elements.name.focus();}
+      catch(error){toast(error.message);}
+    });
+    $(`#${kind}-retry`).addEventListener('click',()=>store?.reconnect());
+    const list=$(kind==='prepare' ? '#checklist' : '#souvenir-list');
+    list.addEventListener('change',async(event)=>{
+      if(event.target.dataset.listAction!=='toggle')return;
+      const id=event.target.closest('[data-list-id]').dataset.listId;
+      try {await store.toggle(id,event.target.checked);}catch(error){toast(error.message);render();}
+    });
+    list.addEventListener('click',async(event)=>{
+      const button=event.target.closest('button[data-list-action]');
+      if(!button)return;
+      const id=button.closest('[data-list-id]').dataset.listId;
+      const item=snapshot.items[id];
+      if(!item)return;
+      if(button.dataset.listAction==='edit') {
+        editId=id;
+        editBaseline={...item};
+        const form=$('#item-edit-form');
+        for(const field of ['name','quantity','owner','place'])form.elements[field].value=item[field];
+        $('#edit-owner-label').hidden=item.kind!=='prepare';
+        $('#edit-place-label').hidden=item.kind!=='souvenirs';
+        $('#item-edit-title').textContent=`${labels[item.kind]} 수정`;
+        $('#edit-message').textContent='';
+        $('#edit-save').disabled=!snapshot.writable;
+        $('#item-edit-dialog').showModal();
+      } else if(button.dataset.listAction==='delete') {
+        try {
+          const deleted=await store.remove(id);
+          lastDeleted=deleted;
+          clearTimeout(undoTimer);
+          $('#list-undo-text').textContent=`${deleted.value.name} 삭제됨`;
+          $('#list-undo').hidden=false;
+          undoTimer=setTimeout(()=>{lastDeleted=null;$('#list-undo').hidden=true;},6000);
+        }catch(error){toast(error.message);}
+      }
+    });
+  }
+  $('#edit-cancel').addEventListener('click',()=>$('#item-edit-dialog').close());
+  $('#item-edit-dialog').addEventListener('close',()=>{
+    const row=[...document.querySelectorAll('[data-list-id]')].find((el)=>el.dataset.listId===editId);
+    row?.querySelector('[data-list-action="edit"]')?.focus({preventScroll:true});
+  });
+  $('#item-edit-form').addEventListener('submit',async(event)=>{
+    event.preventDefault();
+    const fields=Object.fromEntries(new FormData(event.currentTarget));
+    try {await store.edit(editId,fields,editBaseline);$('#item-edit-dialog').close();}
+    catch(error){$('#edit-message').textContent=error.message;}
+  });
+  $('#list-undo-button').addEventListener('click',async()=>{
+    if(!lastDeleted)return;
+    const deleted=lastDeleted;
+    try {await store.restore(deleted);clearTimeout(undoTimer);lastDeleted=null;$('#list-undo').hidden=true;toast('삭제한 항목을 복구했어요.');}
+    catch(error){toast(error.message);}
+  });
+  try {
+    store=window.createTripLists({seed,legacyChecked,onChange:(value)=>{snapshot=value;render();}});
+    snapshot=store.snapshot();render();store.start();
+  }catch{
+    snapshot={...snapshot,configured:true,status:'error'};render();
+  }
+  return {refresh:render,getSnapshot:()=>snapshot};
+};
+</script>
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
@@ -201,7 +588,8 @@ progress::-moz-progress-bar { background:var(--green); }
     <a class="brand" href="#day-1" aria-label="도쿄 우리 함께, 첫째 날 일정"><span class="brand-mark" aria-hidden="true">旅</span><span>도쿄, 우리 함께<span class="brand-sub">OUR LITTLE TOKYO TRIP</span></span></a>
     <nav class="desktop-nav" aria-label="주 메뉴">
       <a href="#day-1" data-nav="schedule" class="active">여행 일정</a>
-      <a href="#prepare" data-nav="prepare">준비 체크</a>
+      <a href="#prepare" data-nav="prepare">준비물</a>
+      <a href="#souvenirs" data-nav="souvenirs">기념품</a>
       <a href="#info" data-nav="info">여행 정보</a>
     </nav>
     <div class="header-actions"><button class="button theme-toggle" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="다크 모드"><span id="theme-icon"></span><span id="theme-label">라이트</span></button>
@@ -261,11 +649,30 @@ progress::-moz-progress-bar { background:var(--green); }
           <div class="day-panel" id="day-panel" role="tabpanel" tabindex="0"></div>
         </section>
         <section id="prepare-view" class="view-panel" aria-labelledby="prepare-title" hidden>
-          <div class="section-heading"><div><p class="eyebrow">PREPARATION</p><h2 id="prepare-title">예약·출발 준비 체크</h2></div><span data-icon="check-circle" class="heading-icon"></span></div>
-          <p class="section-description">체크한 내용은 이 기기의 브라우저에 저장돼요. 예약 완료 여부는 실제 예약 내역과 함께 확인해 주세요.</p>
-          <div class="checklist-overview"><div><strong id="checklist-count">0 / 16</strong><span>준비 완료</span></div><progress id="checklist-progress" max="16" value="0">0%</progress></div>
-          <div id="checklist"></div>
-          <p class="storage-note" id="storage-note"><span data-icon="lock"></span> 체크와 일정 완료 표시는 가족 간 자동으로 동기화되지 않아요.</p>
+          <div class="section-heading"><div><p class="eyebrow">PACKING LIST</p><h2 id="prepare-title">준비물</h2></div><span data-icon="check-circle" class="heading-icon"></span></div>
+          <p class="section-description">예약 확인과 준비물을 추가하고, 준비가 끝나면 체크하세요.</p>
+          <div class="list-status"><span id="prepare-sync-status" role="status">목록 불러오는 중</span><button id="prepare-retry" type="button" hidden>다시 연결</button></div>
+          <div class="checklist-overview"><div><strong id="checklist-count">0 / 0</strong><span>준비 완료</span></div><progress id="checklist-progress" max="1" value="0">0%</progress></div>
+          <form id="prepare-add" class="list-add">
+            <div class="list-add-main"><label>준비물 이름<input name="name" required maxlength="120" placeholder="예: 여권, 충전기" autocomplete="off"></label><button class="button" type="submit">추가</button></div>
+            <details class="list-options"><summary>수량·담당자 입력 (선택)</summary><div class="list-extra-fields"><label>수량<input name="quantity" type="number" min="1" max="99" value="1" required inputmode="numeric"></label><label>담당자<input name="owner" maxlength="40" autocomplete="off"></label></div></details><input type="hidden" name="place" value="">
+          </form>
+          <p class="list-readonly-note">오프라인에서는 저장된 목록만 볼 수 있으며, 수정은 인터넷 연결 후 가능합니다.</p>
+          <div id="checklist" class="shared-items"></div>
+          <p class="storage-note" id="storage-note"></p>
+        </section>
+        <section id="souvenirs-view" class="view-panel" aria-labelledby="souvenirs-title" hidden>
+          <div class="section-heading"><div><p class="eyebrow">SHOPPING LIST</p><h2 id="souvenirs-title">기념품</h2></div><span data-icon="shopping" class="heading-icon"></span></div>
+          <p class="section-description">구매할 품목과 수량을 추가하고, 구매 후 체크하세요.</p>
+          <div class="list-status"><span id="souvenirs-sync-status" role="status">목록 불러오는 중</span><button id="souvenirs-retry" type="button" hidden>다시 연결</button></div>
+          <div class="checklist-overview"><div><strong id="souvenir-count">0 / 0</strong><span>구매 완료</span></div><progress id="souvenir-progress" max="1" value="0">0%</progress></div>
+          <form id="souvenirs-add" class="list-add">
+            <div class="list-add-main"><label>기념품 이름<input name="name" required maxlength="120" placeholder="예: 도쿄 바나나" autocomplete="off"></label><button class="button" type="submit">추가</button></div>
+            <details class="list-options"><summary>수량·구매할 장소 입력 (선택)</summary><div class="list-extra-fields"><label>수량<input name="quantity" type="number" min="1" max="99" value="1" required inputmode="numeric"></label><label>구매할 장소<input name="place" maxlength="100" autocomplete="off"></label></div></details><input type="hidden" name="owner" value="">
+          </form>
+          <p class="list-readonly-note">오프라인에서는 저장된 목록만 볼 수 있으며, 수정은 인터넷 연결 후 가능합니다.</p>
+          <div id="souvenir-list" class="shared-items"></div>
+
         </section>
         <section id="info-view" class="view-panel" aria-labelledby="info-title" hidden>
           <div class="section-heading"><div><p class="eyebrow">GOOD TO KNOW</p><h2 id="info-title">숙소·항공·예약 정보</h2></div><button id="print-button" class="button" type="button"><span data-icon="print"></span> 인쇄</button></div>
@@ -283,7 +690,7 @@ progress::-moz-progress-bar { background:var(--green); }
       <aside class="sidebar" aria-label="여행 도움말">
         <article class="side-card hotel-card"><p class="eyebrow">HOTEL · KINSHICHO</p><span class="hotel-symbol" data-icon="bed"></span><h3>토부 호텔<br>레반트 도쿄</h3><p>토부 호텔 레반트 도쿄</p><span class="hotel-dates">01.04 CHECK IN <span>→</span> 01.07 CHECK OUT</span><a class="button hotel-button" href="https://www.google.com/maps/search/?api=1&amp;query=Tobu+Hotel+Levant+Tokyo" target="_blank" rel="noopener noreferrer"><span data-icon="map-pin"></span> 숙소 지도 보기 <span data-icon="arrow-up-right"></span></a></article>
         <article class="side-card memo-card"><span data-icon="alert"></span><h3>방문 전 확인</h3><p>입장권·운영시간·교통편은<br>확정 전의 계획입니다.<br>예약 내역을 먼저 확인하세요.</p></article>
-        <a class="side-prepare" href="#prepare"><span data-icon="check-circle"></span><div><strong>출발 전 준비 체크</strong><span id="side-check-count">16개 항목 확인</span></div><span data-icon="arrow-right"></span></a>
+        <a class="side-prepare" href="#prepare"><span data-icon="check-circle"></span><div><strong>출발 전 준비물</strong><span id="side-check-count">16개 항목 확인</span></div><span data-icon="arrow-right"></span></a>
       </aside>
     </div>
     <section id="print-itinerary" class="print-only" aria-label="인쇄용 전체 일정"></section>
@@ -395,7 +802,9 @@ DAY 4 · 2027-01-07 (목) · 나리타공항 · 인천 귀국
 </pre></details></div></noscript>
   </main>
   <footer class="site-footer"><span>도쿄, 우리 함께 <span class="footer-flower">✳</span> 2027</span><span id="connection-status" role="status"><span class="status-dot"></span> 온라인</span><span class="footer-source">가족 일정표 기준 · 예약·시간 미확정</span></footer>
-  <nav class="mobile-nav" aria-label="모바일 주 메뉴"><a href="#day-1" data-nav="schedule" class="active"><span data-icon="calendar"></span>여행 일정</a><a href="#prepare" data-nav="prepare"><span data-icon="check-circle"></span>준비 체크</a><a href="#info" data-nav="info"><span data-icon="info"></span>여행 정보</a></nav>
+  <nav class="mobile-nav" aria-label="모바일 주 메뉴"><a href="#day-1" data-nav="schedule" class="active"><span data-icon="calendar"></span>여행 일정</a><a href="#prepare" data-nav="prepare"><span data-icon="check-circle"></span>준비물</a><a href="#souvenirs" data-nav="souvenirs"><span data-icon="shopping"></span>기념품</a><a href="#info" data-nav="info"><span data-icon="info"></span>여행 정보</a></nav>
+  <dialog id="item-edit-dialog" class="list-modal" aria-labelledby="item-edit-title"><form id="item-edit-form"><h3 id="item-edit-title">항목 수정</h3><label>품목명<input name="name" required maxlength="120" autocomplete="off"></label><label>수량<input name="quantity" type="number" min="1" max="99" required inputmode="numeric"></label><label id="edit-owner-label">담당자<input name="owner" maxlength="40" autocomplete="off"></label><label id="edit-place-label">구매할 장소<input name="place" maxlength="100" autocomplete="off"></label><p id="edit-message" class="list-modal-message" role="status"></p><div class="list-modal-actions"><button id="edit-cancel" class="button" type="button">취소</button><button id="edit-save" class="button save-button" type="submit">저장</button></div></form></dialog>
+  <div class="list-undo" id="list-undo" role="status" hidden><span id="list-undo-text"></span><button id="list-undo-button" type="button">되돌리기</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>(() => {
 // Source: family itinerary PDF. Times are plans, never confirmed reservations.
@@ -494,6 +903,9 @@ const officialLinks = [
 ];
 
 const paths = {
+  shopping:'M4 7h16l-1 14H5L4 7Zm4 0V5a4 4 0 0 1 8 0v2',
+  edit:'m16 3 5 5-12 12-6 1 1-6L16 3Zm-2 2 5 5',
+  trash:'M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7',
   sun:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0-6v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5',
   moon:'M20 15.3A9 9 0 0 1 8.7 4a9 9 0 1 0 11.3 11.3Z',
   calendar:'M7 3v4m10-4v4M4 10h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z',
@@ -543,6 +955,7 @@ let offlineReady = false;
 let registration;
 let toastTimer;
 let focusDayAfterNavigation = null;
+let listUI;
 
 function toast(message) {
   $('#toast').textContent = message;
@@ -563,7 +976,7 @@ function persist() {
 }
 
 function updateStorageNote() {
-  if (!storageAvailable) $('#storage-note').textContent = '브라우저 저장을 사용할 수 없어요. 체크는 현재 화면에서만 유지됩니다.';
+  listUI?.refresh();
 }
 
 function japanNow() {
@@ -627,31 +1040,17 @@ function renderDay() {
     ${selectedDay < 3 ? `<a class="next-day" href="#day-${selectedDay+2}"><div><small>NEXT JOURNEY · DAY 0${selectedDay+2}</small><strong>${escape(trip.days[selectedDay+1].title)}</strong></div>${icon('arrow-right')}</a>` : '<a class="next-day" href="#prepare"><div><small>BEFORE WE GO</small><strong>빠뜨린 준비는 없는지 확인해요</strong></div>'+icon('check-circle')+'</a>'}`;
 }
 
-function renderChecklist() {
-  $('#checklist').innerHTML = checklist.map((group) => `<fieldset class="check-group"><legend>${escape(group.title)}</legend>${group.items.map(([id,label]) => `<label class="check-item"><input type="checkbox" data-check="${id}" ${checked.has(id) ? 'checked' : ''}><span>${escape(label)}</span></label>`).join('')}</fieldset>`).join('');
-  updateProgress();
-}
-
-function updateProgress() {
-  const ids = checklist.flatMap((group) => group.items.map(([id]) => id));
-  const count = ids.filter((id) => checked.has(id)).length;
-  $('#checklist-count').textContent = `${count} / ${ids.length}`;
-  $('#checklist-progress').max = ids.length;
-  $('#checklist-progress').value = count;
-  $('#checklist-progress').textContent = `${Math.round(count/ids.length*100)}%`;
-  $('#checklist-progress').setAttribute('aria-label',`${ids.length}개 중 ${count}개 준비 완료`);
-  $('#side-check-count').textContent = `${ids.length}개 중 ${count}개 준비 완료`;
-}
+function renderChecklist() { listUI?.refresh(); }
 
 function route({ scroll = false } = {}) {
   const hash = location.hash;
-  activeView = hash === '#prepare' ? 'prepare' : hash === '#info' ? 'info' : 'schedule';
+  activeView = hash === '#prepare' ? 'prepare' : hash === '#souvenirs' ? 'souvenirs' : hash === '#info' ? 'info' : 'schedule';
   if (/^#day-[1-4]$/.test(hash)) selectedDay = Number(hash.slice(-1)) - 1;
   else if (!hash) {
     const today = trip.days.findIndex((day) => day.date === japanNow().date);
     selectedDay = today >= 0 ? today : 0;
   }
-  for (const view of ['schedule','prepare','info']) $(`#${view}-view`).hidden = view !== activeView;
+  for (const view of ['schedule','prepare','souvenirs','info']) $(`#${view}-view`).hidden = view !== activeView;
   document.querySelectorAll('[data-nav]').forEach((link) => {
     const active = link.dataset.nav === activeView;
     link.classList.toggle('active',active);
@@ -689,7 +1088,7 @@ function connectionStatus() {
 async function checkOfflineCache() {
   try {
     if (!('caches' in window)) return;
-    const files = ['index.html','styles.css','theme.css','theme.js','app.js','itinerary.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt'];
+    const files = ['index.html','styles.css','theme.css','theme.js','shared-lists.css','firebase-config.js','shared-lists.js','list-ui.js','app.js','itinerary.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt'];
     const found = await Promise.all(files.map((file) => caches.match(new URL(file,location.href.split('#')[0]))));
     offlineReady = found.every(Boolean);
     if (offlineReady) $('#offline-details').textContent = '일정과 준비 목록을 이 기기에 저장했어요. 연결이 끊겨도 일정을 열 수 있어요. 출발 전에 비행기 모드에서 한 번 확인해 주세요.';
@@ -731,7 +1130,7 @@ updateThemeButton();
 $('#theme-toggle').addEventListener('click',() => window.tripTheme?.toggle());
 window.addEventListener('tripthemechange',updateThemeButton);
 updateCountdown();
-renderChecklist();
+listUI = window.mountTripLists({seed:checklist.flatMap((group)=>group.items),legacyChecked:[...checked],toast,icon});
 renderPrint();
 updateStorageNote();
 $('#official-links').innerHTML = officialLinks.map(([label,url]) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${escape(label)}${icon('external')}</a>`).join('');
@@ -751,7 +1150,7 @@ function selectDay(day) {
 
 document.addEventListener('click', (event) => {
   const routeLink = event.target.closest('a[href^="#"]');
-  if (routeLink && /^#(?:day-[1-4]|prepare|info)$/.test(routeLink.getAttribute('href'))) {
+  if (routeLink && /^#(?:day-[1-4]|prepare|souvenirs|info)$/.test(routeLink.getAttribute('href'))) {
     // In srcdoc previews, native fragment links can resolve against the parent
     // page URL and replace the iframe. Change this document's fragment directly.
     event.preventDefault();
@@ -786,14 +1185,6 @@ $('#day-tabs').addEventListener('keydown',(event) => {
   selectDay(day);
 });
 
-$('#checklist').addEventListener('change', (event) => {
-  const id = event.target.dataset.check;
-  if (!id) return;
-  if (event.target.checked) checked.add(id); else checked.delete(id);
-  persist();
-  updateProgress();
-});
-
 window.addEventListener('hashchange',() => route({scroll:true}));
 window.addEventListener('online',connectionStatus);
 window.addEventListener('offline',connectionStatus);
@@ -808,6 +1199,10 @@ if (!portableMode) {
 }
 
 $('#share-button').addEventListener('click',async () => {
+  if (!portableMode && ['prepare','souvenirs'].includes(activeView) && !listUI?.getSnapshot().configured) {
+    toast('가족 공유 연결 전입니다. Firebase 설정 후 같은 링크로 목록을 공유할 수 있어요.');
+    return;
+  }
   if (portableMode) {
     toast('이 HTML 파일을 가족에게 전달하거나, 공개 배포 후 사이트 주소를 공유해 주세요.');
     return;

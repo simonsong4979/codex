@@ -15,6 +15,10 @@
   <script src="./theme.js"></script>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./theme.css">
+  <link rel="stylesheet" href="./shared-lists.css">
+  <script src="./firebase-config.js"></script>
+  <script src="./shared-lists.js"></script>
+  <script src="./list-ui.js"></script>
   <script type="module" src="./app.js"></script>
 </head>
 <body>
@@ -23,7 +27,8 @@
     <a class="brand" href="#day-1" aria-label="도쿄 우리 함께, 첫째 날 일정"><span class="brand-mark" aria-hidden="true">旅</span><span>도쿄, 우리 함께<span class="brand-sub">OUR LITTLE TOKYO TRIP</span></span></a>
     <nav class="desktop-nav" aria-label="주 메뉴">
       <a href="#day-1" data-nav="schedule" class="active">여행 일정</a>
-      <a href="#prepare" data-nav="prepare">준비 체크</a>
+      <a href="#prepare" data-nav="prepare">준비물</a>
+      <a href="#souvenirs" data-nav="souvenirs">기념품</a>
       <a href="#info" data-nav="info">여행 정보</a>
     </nav>
     <div class="header-actions"><button class="button theme-toggle" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="다크 모드"><span id="theme-icon"></span><span id="theme-label">라이트</span></button>
@@ -83,11 +88,30 @@
           <div class="day-panel" id="day-panel" role="tabpanel" tabindex="0"></div>
         </section>
         <section id="prepare-view" class="view-panel" aria-labelledby="prepare-title" hidden>
-          <div class="section-heading"><div><p class="eyebrow">PREPARATION</p><h2 id="prepare-title">예약·출발 준비 체크</h2></div><span data-icon="check-circle" class="heading-icon"></span></div>
-          <p class="section-description">체크한 내용은 이 기기의 브라우저에 저장돼요. 예약 완료 여부는 실제 예약 내역과 함께 확인해 주세요.</p>
-          <div class="checklist-overview"><div><strong id="checklist-count">0 / 16</strong><span>준비 완료</span></div><progress id="checklist-progress" max="16" value="0">0%</progress></div>
-          <div id="checklist"></div>
-          <p class="storage-note" id="storage-note"><span data-icon="lock"></span> 체크와 일정 완료 표시는 가족 간 자동으로 동기화되지 않아요.</p>
+          <div class="section-heading"><div><p class="eyebrow">PACKING LIST</p><h2 id="prepare-title">준비물</h2></div><span data-icon="check-circle" class="heading-icon"></span></div>
+          <p class="section-description">예약 확인과 준비물을 추가하고, 준비가 끝나면 체크하세요.</p>
+          <div class="list-status"><span id="prepare-sync-status" role="status">목록 불러오는 중</span><button id="prepare-retry" type="button" hidden>다시 연결</button></div>
+          <div class="checklist-overview"><div><strong id="checklist-count">0 / 0</strong><span>준비 완료</span></div><progress id="checklist-progress" max="1" value="0">0%</progress></div>
+          <form id="prepare-add" class="list-add">
+            <div class="list-add-main"><label>준비물 이름<input name="name" required maxlength="120" placeholder="예: 여권, 충전기" autocomplete="off"></label><button class="button" type="submit">추가</button></div>
+            <details class="list-options"><summary>수량·담당자 입력 (선택)</summary><div class="list-extra-fields"><label>수량<input name="quantity" type="number" min="1" max="99" value="1" required inputmode="numeric"></label><label>담당자<input name="owner" maxlength="40" autocomplete="off"></label></div></details><input type="hidden" name="place" value="">
+          </form>
+          <p class="list-readonly-note">오프라인에서는 저장된 목록만 볼 수 있으며, 수정은 인터넷 연결 후 가능합니다.</p>
+          <div id="checklist" class="shared-items"></div>
+          <p class="storage-note" id="storage-note"></p>
+        </section>
+        <section id="souvenirs-view" class="view-panel" aria-labelledby="souvenirs-title" hidden>
+          <div class="section-heading"><div><p class="eyebrow">SHOPPING LIST</p><h2 id="souvenirs-title">기념품</h2></div><span data-icon="shopping" class="heading-icon"></span></div>
+          <p class="section-description">구매할 품목과 수량을 추가하고, 구매 후 체크하세요.</p>
+          <div class="list-status"><span id="souvenirs-sync-status" role="status">목록 불러오는 중</span><button id="souvenirs-retry" type="button" hidden>다시 연결</button></div>
+          <div class="checklist-overview"><div><strong id="souvenir-count">0 / 0</strong><span>구매 완료</span></div><progress id="souvenir-progress" max="1" value="0">0%</progress></div>
+          <form id="souvenirs-add" class="list-add">
+            <div class="list-add-main"><label>기념품 이름<input name="name" required maxlength="120" placeholder="예: 도쿄 바나나" autocomplete="off"></label><button class="button" type="submit">추가</button></div>
+            <details class="list-options"><summary>수량·구매할 장소 입력 (선택)</summary><div class="list-extra-fields"><label>수량<input name="quantity" type="number" min="1" max="99" value="1" required inputmode="numeric"></label><label>구매할 장소<input name="place" maxlength="100" autocomplete="off"></label></div></details><input type="hidden" name="owner" value="">
+          </form>
+          <p class="list-readonly-note">오프라인에서는 저장된 목록만 볼 수 있으며, 수정은 인터넷 연결 후 가능합니다.</p>
+          <div id="souvenir-list" class="shared-items"></div>
+
         </section>
         <section id="info-view" class="view-panel" aria-labelledby="info-title" hidden>
           <div class="section-heading"><div><p class="eyebrow">GOOD TO KNOW</p><h2 id="info-title">숙소·항공·예약 정보</h2></div><button id="print-button" class="button" type="button"><span data-icon="print"></span> 인쇄</button></div>
@@ -105,14 +129,16 @@
       <aside class="sidebar" aria-label="여행 도움말">
         <article class="side-card hotel-card"><p class="eyebrow">HOTEL · KINSHICHO</p><span class="hotel-symbol" data-icon="bed"></span><h3>토부 호텔<br>레반트 도쿄</h3><p>토부 호텔 레반트 도쿄</p><span class="hotel-dates">01.04 CHECK IN <span>→</span> 01.07 CHECK OUT</span><a class="button hotel-button" href="https://www.google.com/maps/search/?api=1&amp;query=Tobu+Hotel+Levant+Tokyo" target="_blank" rel="noopener noreferrer"><span data-icon="map-pin"></span> 숙소 지도 보기 <span data-icon="arrow-up-right"></span></a></article>
         <article class="side-card memo-card"><span data-icon="alert"></span><h3>방문 전 확인</h3><p>입장권·운영시간·교통편은<br>확정 전의 계획입니다.<br>예약 내역을 먼저 확인하세요.</p></article>
-        <a class="side-prepare" href="#prepare"><span data-icon="check-circle"></span><div><strong>출발 전 준비 체크</strong><span id="side-check-count">16개 항목 확인</span></div><span data-icon="arrow-right"></span></a>
+        <a class="side-prepare" href="#prepare"><span data-icon="check-circle"></span><div><strong>출발 전 준비물</strong><span id="side-check-count">16개 항목 확인</span></div><span data-icon="arrow-right"></span></a>
       </aside>
     </div>
     <section id="print-itinerary" class="print-only" aria-label="인쇄용 전체 일정"></section>
     <noscript><div class="noscript-notice">일정 표시와 오프라인 기능을 사용하려면 JavaScript를 켜 주세요. <a href="./itinerary.txt">텍스트 일정표 보기</a></div></noscript>
   </main>
   <footer class="site-footer"><span>도쿄, 우리 함께 <span class="footer-flower">✳</span> 2027</span><span id="connection-status" role="status"><span class="status-dot"></span> 온라인</span><span class="footer-source">가족 일정표 기준 · 예약·시간 미확정</span></footer>
-  <nav class="mobile-nav" aria-label="모바일 주 메뉴"><a href="#day-1" data-nav="schedule" class="active"><span data-icon="calendar"></span>여행 일정</a><a href="#prepare" data-nav="prepare"><span data-icon="check-circle"></span>준비 체크</a><a href="#info" data-nav="info"><span data-icon="info"></span>여행 정보</a></nav>
+  <nav class="mobile-nav" aria-label="모바일 주 메뉴"><a href="#day-1" data-nav="schedule" class="active"><span data-icon="calendar"></span>여행 일정</a><a href="#prepare" data-nav="prepare"><span data-icon="check-circle"></span>준비물</a><a href="#souvenirs" data-nav="souvenirs"><span data-icon="shopping"></span>기념품</a><a href="#info" data-nav="info"><span data-icon="info"></span>여행 정보</a></nav>
+  <dialog id="item-edit-dialog" class="list-modal" aria-labelledby="item-edit-title"><form id="item-edit-form"><h3 id="item-edit-title">항목 수정</h3><label>품목명<input name="name" required maxlength="120" autocomplete="off"></label><label>수량<input name="quantity" type="number" min="1" max="99" required inputmode="numeric"></label><label id="edit-owner-label">담당자<input name="owner" maxlength="40" autocomplete="off"></label><label id="edit-place-label">구매할 장소<input name="place" maxlength="100" autocomplete="off"></label><p id="edit-message" class="list-modal-message" role="status"></p><div class="list-modal-actions"><button id="edit-cancel" class="button" type="button">취소</button><button id="edit-save" class="button save-button" type="submit">저장</button></div></form></dialog>
+  <div class="list-undo" id="list-undo" role="status" hidden><span id="list-undo-text"></span><button id="list-undo-button" type="button">되돌리기</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

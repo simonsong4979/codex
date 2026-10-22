@@ -1,6 +1,9 @@
 import { trip, checklist, officialLinks } from './itinerary.js';
 
 const paths = {
+  shopping:'M4 7h16l-1 14H5L4 7Zm4 0V5a4 4 0 0 1 8 0v2',
+  edit:'m16 3 5 5-12 12-6 1 1-6L16 3Zm-2 2 5 5',
+  trash:'M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7',
   sun:'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0-6v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5',
   moon:'M20 15.3A9 9 0 0 1 8.7 4a9 9 0 1 0 11.3 11.3Z',
   calendar:'M7 3v4m10-4v4M4 10h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z',
@@ -50,6 +53,7 @@ let offlineReady = false;
 let registration;
 let toastTimer;
 let focusDayAfterNavigation = null;
+let listUI;
 
 function toast(message) {
   $('#toast').textContent = message;
@@ -70,7 +74,7 @@ function persist() {
 }
 
 function updateStorageNote() {
-  if (!storageAvailable) $('#storage-note').textContent = '브라우저 저장을 사용할 수 없어요. 체크는 현재 화면에서만 유지됩니다.';
+  listUI?.refresh();
 }
 
 function japanNow() {
@@ -134,31 +138,17 @@ function renderDay() {
     ${selectedDay < 3 ? `<a class="next-day" href="#day-${selectedDay+2}"><div><small>NEXT JOURNEY · DAY 0${selectedDay+2}</small><strong>${escape(trip.days[selectedDay+1].title)}</strong></div>${icon('arrow-right')}</a>` : '<a class="next-day" href="#prepare"><div><small>BEFORE WE GO</small><strong>빠뜨린 준비는 없는지 확인해요</strong></div>'+icon('check-circle')+'</a>'}`;
 }
 
-function renderChecklist() {
-  $('#checklist').innerHTML = checklist.map((group) => `<fieldset class="check-group"><legend>${escape(group.title)}</legend>${group.items.map(([id,label]) => `<label class="check-item"><input type="checkbox" data-check="${id}" ${checked.has(id) ? 'checked' : ''}><span>${escape(label)}</span></label>`).join('')}</fieldset>`).join('');
-  updateProgress();
-}
-
-function updateProgress() {
-  const ids = checklist.flatMap((group) => group.items.map(([id]) => id));
-  const count = ids.filter((id) => checked.has(id)).length;
-  $('#checklist-count').textContent = `${count} / ${ids.length}`;
-  $('#checklist-progress').max = ids.length;
-  $('#checklist-progress').value = count;
-  $('#checklist-progress').textContent = `${Math.round(count/ids.length*100)}%`;
-  $('#checklist-progress').setAttribute('aria-label',`${ids.length}개 중 ${count}개 준비 완료`);
-  $('#side-check-count').textContent = `${ids.length}개 중 ${count}개 준비 완료`;
-}
+function renderChecklist() { listUI?.refresh(); }
 
 function route({ scroll = false } = {}) {
   const hash = location.hash;
-  activeView = hash === '#prepare' ? 'prepare' : hash === '#info' ? 'info' : 'schedule';
+  activeView = hash === '#prepare' ? 'prepare' : hash === '#souvenirs' ? 'souvenirs' : hash === '#info' ? 'info' : 'schedule';
   if (/^#day-[1-4]$/.test(hash)) selectedDay = Number(hash.slice(-1)) - 1;
   else if (!hash) {
     const today = trip.days.findIndex((day) => day.date === japanNow().date);
     selectedDay = today >= 0 ? today : 0;
   }
-  for (const view of ['schedule','prepare','info']) $(`#${view}-view`).hidden = view !== activeView;
+  for (const view of ['schedule','prepare','souvenirs','info']) $(`#${view}-view`).hidden = view !== activeView;
   document.querySelectorAll('[data-nav]').forEach((link) => {
     const active = link.dataset.nav === activeView;
     link.classList.toggle('active',active);
@@ -196,7 +186,7 @@ function connectionStatus() {
 async function checkOfflineCache() {
   try {
     if (!('caches' in window)) return;
-    const files = ['index.html','styles.css','theme.css','theme.js','app.js','itinerary.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt'];
+    const files = ['index.html','styles.css','theme.css','theme.js','shared-lists.css','firebase-config.js','shared-lists.js','list-ui.js','app.js','itinerary.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','itinerary.txt'];
     const found = await Promise.all(files.map((file) => caches.match(new URL(file,location.href.split('#')[0]))));
     offlineReady = found.every(Boolean);
     if (offlineReady) $('#offline-details').textContent = '일정과 준비 목록을 이 기기에 저장했어요. 연결이 끊겨도 일정을 열 수 있어요. 출발 전에 비행기 모드에서 한 번 확인해 주세요.';
@@ -238,7 +228,7 @@ updateThemeButton();
 $('#theme-toggle').addEventListener('click',() => window.tripTheme?.toggle());
 window.addEventListener('tripthemechange',updateThemeButton);
 updateCountdown();
-renderChecklist();
+listUI = window.mountTripLists({seed:checklist.flatMap((group)=>group.items),legacyChecked:[...checked],toast,icon});
 renderPrint();
 updateStorageNote();
 $('#official-links').innerHTML = officialLinks.map(([label,url]) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${escape(label)}${icon('external')}</a>`).join('');
@@ -258,7 +248,7 @@ function selectDay(day) {
 
 document.addEventListener('click', (event) => {
   const routeLink = event.target.closest('a[href^="#"]');
-  if (routeLink && /^#(?:day-[1-4]|prepare|info)$/.test(routeLink.getAttribute('href'))) {
+  if (routeLink && /^#(?:day-[1-4]|prepare|souvenirs|info)$/.test(routeLink.getAttribute('href'))) {
     // In srcdoc previews, native fragment links can resolve against the parent
     // page URL and replace the iframe. Change this document's fragment directly.
     event.preventDefault();
@@ -293,14 +283,6 @@ $('#day-tabs').addEventListener('keydown',(event) => {
   selectDay(day);
 });
 
-$('#checklist').addEventListener('change', (event) => {
-  const id = event.target.dataset.check;
-  if (!id) return;
-  if (event.target.checked) checked.add(id); else checked.delete(id);
-  persist();
-  updateProgress();
-});
-
 window.addEventListener('hashchange',() => route({scroll:true}));
 window.addEventListener('online',connectionStatus);
 window.addEventListener('offline',connectionStatus);
@@ -315,6 +297,10 @@ if (!portableMode) {
 }
 
 $('#share-button').addEventListener('click',async () => {
+  if (!portableMode && ['prepare','souvenirs'].includes(activeView) && !listUI?.getSnapshot().configured) {
+    toast('가족 공유 연결 전입니다. Firebase 설정 후 같은 링크로 목록을 공유할 수 있어요.');
+    return;
+  }
   if (portableMode) {
     toast('이 HTML 파일을 가족에게 전달하거나, 공개 배포 후 사이트 주소를 공유해 주세요.');
     return;

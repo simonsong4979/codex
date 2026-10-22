@@ -51,7 +51,7 @@ const server = http.createServer((req,res)=>{
     for (const mode of ['dark','light']) {
       await page.emulateMedia({colorScheme:mode});
       await page.waitForFunction((mode)=>document.documentElement.dataset.theme===mode,mode);
-      for (const route of ['#day-2','#prepare','#info']) {
+      for (const route of ['#day-2','#prepare','#souvenirs','#info']) {
         await page.goto(origin+'/'+route);
         await page.waitForFunction((hash)=>location.hash===hash,route);
         const contrast = await page.evaluate(()=>{
@@ -129,7 +129,7 @@ const server = http.createServer((req,res)=>{
     pass('filters show 6 transfers / 8 visits, conflicting restaurant has warning and no invented map');
 
     await page.locator('[data-complete="d2-2"]').click();
-    await page.getByRole('navigation',{name:'모바일 주 메뉴'}).getByRole('link',{name:'준비 체크'}).click();
+    await page.getByRole('navigation',{name:'모바일 주 메뉴'}).getByRole('link',{name:'준비물'}).click();
     await page.locator('[data-check="passport"]').check();
     await page.locator('[data-check="flight"]').check();
     assert.equal(await page.locator('#checklist-count').textContent(),'2 / 16');
@@ -160,6 +160,7 @@ const server = http.createServer((req,res)=>{
     await page.waitForFunction(()=>document.querySelectorAll('.event').length===2);
     assert.equal(await page.locator('.event').count(),2);
     await page.getByRole('navigation',{name:'모바일 주 메뉴'}).getByRole('link',{name:'여행 정보'}).click();
+    await page.waitForFunction(()=>document.querySelector('#offline-details').textContent.includes('저장했어요'));
     assert.match(await page.locator('#offline-details').textContent(),/저장했어요/);
     assert.match(await page.locator('#connection-status').textContent(),/오프라인/);
     await page.getByRole('button',{name:'업데이트 확인'}).click();
@@ -206,7 +207,7 @@ const server = http.createServer((req,res)=>{
     await denied.goto(origin+'/');
     await denied.locator('[data-complete="d1-1"]').click();
     await denied.goto(origin+'/#prepare');
-    assert.match(await denied.locator('#storage-note').textContent(),/저장을 사용할 수 없어요/);
+    assert.match(await denied.locator('#storage-note').textContent(),/저장.*제한/);
     pass('storage-disabled browsers still render and explain temporary check state');
 
     const nested = await browser.newContext();

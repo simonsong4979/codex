@@ -1,0 +1,31 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "trips": {
+      "$room": {
+        ".read": "auth != null && $room.matches(/^[a-f0-9]{32}$/)",
+        ".write": "auth != null && $room.matches(/^[a-f0-9]{32}$/) && !data.exists()",
+        ".validate": "newData.hasChildren(['version'])",
+        "version": { ".validate": "newData.val() === 1" },
+        "items": {
+          ".validate": "newData.hasChildren()",
+          "$item": {
+            ".write": "auth != null && $room.matches(/^[a-f0-9]{32}$/) && root.child('trips').child($room).child('version').val() === 1",
+            ".validate": "$item.matches(/^[A-Za-z0-9_-]{1,64}$/) && $item !== '__proto__' && $item !== 'prototype' && $item !== 'constructor' && newData.hasChildren(['name','kind','quantity','owner','place','done','createdAt','updatedAt'])",
+            "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120 && newData.val().matches(/.*\\S.*/)" },
+            "kind": { ".validate": "(newData.val() === 'prepare' || newData.val() === 'souvenirs') && (!data.exists() || newData.val() === data.val())" },
+            "quantity": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 99 && newData.val() % 1 === 0" },
+            "owner": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "place": { ".validate": "newData.isString() && newData.val().length <= 100" },
+            "done": { ".validate": "newData.isBoolean()" },
+            "createdAt": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now + 60000 && (!data.exists() || newData.val() === data.val())" },
+            "updatedAt": { ".validate": "newData.isNumber() && newData.val() >= newData.parent().child('createdAt').val() && newData.val() <= now + 60000" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
