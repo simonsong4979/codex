@@ -68,4 +68,6 @@
 - Added root `netlify.toml` to select static base `tokyo-trip`, publish `.`, and a tested static asset verification command; leaves portfolio source and main unchanged.
 - Copied verified ZIP and portable HTML to `releases/` for delivery via GitHub, with SHA256SUMS. No uploaded PDF, secrets, node_modules, or browser artifacts included.
 - Free workflow: Netlify Free → import GitHub repository → branch tokyo-trip-deploy → deploy with config. Use included netlify.app subdomain; no paid custom domain or API. Free usage limits apply; do not promise unlimited access or claim site publication before verification.
-- Preparing a dedicated Git branch for the accepted trip site and deployment artifacts. Push result must be recorded before describing it as uploaded.
+- Uploaded dedicated branch `tokyo-trip-deploy` to origin successfully. Release commit `1f3a4d452ebad7d3aa82e48ad30eb1bae0ecb58a`; original main is unchanged. Verified remote ref with git ls-remote.
+- Verified actual HTTPS download returns HTTP 200 and a ZIP signature; downloaded SHA256 matches the release exactly: https://github.com/simonsong4979/codex/raw/refs/heads/tokyo-trip-deploy/releases/tokyo-trip.zip . Use this REAL URL for download handoff, never the workspace link.
+- GitHub project: https://github.com/simonsong4979/codex/tree/tokyo-trip-deploy . Source and deployment files are now remotely available. No Netlify login or website deployment has occurred; public site URL still absent.

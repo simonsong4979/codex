@@ -4,7 +4,9 @@
 
 ## 무료 배포 권장: GitHub 연결 (ZIP 다운로드 불필요)
 
-채팅의 `/workspace/...` 링크는 외부 다운로드 주소가 아니므로 열리지 않을 수 있습니다. GitHub의 `tokyo-trip-deploy` 브랜치를 사용하면 파일을 내려받을 필요가 없습니다. 실제 브랜치 게시 여부와 SHA는 `TRIP_PROJECT.md`의 최신 배포 기록을 확인하세요.
+채팅의 `/workspace/...` 링크는 외부 다운로드 주소가 아니므로 열리지 않을 수 있습니다. [GitHub의 배포 브랜치](https://github.com/simonsong4979/codex/tree/tokyo-trip-deploy)는 업로드 완료했으며, 이 브랜치를 사용하면 파일을 내려받을 필요가 없습니다.
+
+파일로 올리려면 [실제 ZIP 다운로드](https://github.com/simonsong4979/codex/raw/refs/heads/tokyo-trip-deploy/releases/tokyo-trip.zip)를 이용하세요. 이 주소는 HTTP 200, ZIP 형식, 원본과 동일한 SHA256까지 확인했습니다.
 
 1. [Netlify](https://app.netlify.com/)에 가입 또는 로그인하고 **Free** 플랜을 선택합니다. 유료 업그레이드나 별도 도메인 구매는 하지 않습니다.
 2. 새 프로젝트 추가 메뉴에서 **Import an existing project** → **GitHub**를 선택합니다. 메뉴 이름은 서비스 UI에 따라 다를 수 있습니다.
@@ -17,7 +19,7 @@
 
 ## 대안: 파일을 직접 올리는 Netlify Drop
 
-1. 이 작업에서 만든 `/workspace/trip-release/tokyo-trip.zip`을 내려받고 압축을 풉니다.
+1. 위의 **실제 ZIP 다운로드** 링크에서 파일을 내려받고 압축을 풉니다.
 2. [Netlify Drop](https://app.netlify.com/drop)을 열고 무료 계정으로 로그인합니다. 지속해서 관리할 수 있는 본인 계정을 사용하세요.
 3. **`index.html`이 바로 들어 있는 폴더**를 업로드 영역에 놓습니다. ZIP 자체 대신 압축을 푼 폴더를 올리세요.
 4. 게시가 끝나면 Netlify가 제공하는 `https://…netlify.app` 주소를 휴대폰에서 엽니다. 실제 주소는 업로드 후 생성됩니다.
