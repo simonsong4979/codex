@@ -1,0 +1,131 @@
+/* Semantic colors shared by both modes. Layout remains in styles.css. */
+:root {
+  color-scheme: light;
+  --bg:#f6f7f9; --paper:#ffffff; --ink:#182b39; --muted:#536373;
+  --line:#d8e0e5; --green:#086153; --orange:#945023;
+  --sage:#e7f0ed; --soft:#edf1f5;
+  --hero:#e5efec; --hero-ink:#234b44; --hero-muted:#45655b;
+  --selected:#15594f; --selected-ink:#ffffff; --selected-muted:#d9f2e9;
+  --tag-bg:#e6eeea; --tag-ink:#345c49;
+  --warning-bg:#fff0d9; --warning-ink:#774618; --warning-line:#e6c99b;
+  --hotel-bg:#1b4b43; --hotel-ink:#f5fff9; --hotel-muted:#d3e6dc;
+  --hotel-button:#2e6256; --hotel-line:#7caa98;
+  --nav-bg:#ffffff; --hover:#e7eeef; --focus:#a54b15;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:#101820; --paper:#192530; --ink:#f0f5fa; --muted:#b6c6d4;
+  --line:#3c5060; --green:#8be2c9; --orange:#ffbc83;
+  --sage:#21362f; --soft:#22313f;
+  --hero:#1d3534; --hero-ink:#e6fff4; --hero-muted:#bedbd0;
+  --selected:#92e4cd; --selected-ink:#102e27; --selected-muted:#234a3f;
+  --tag-bg:#2b413c; --tag-ink:#c6eddd;
+  --warning-bg:#3a2b1d; --warning-ink:#ffdaad; --warning-line:#7b5b36;
+  --hotel-bg:#1c3e37; --hotel-ink:#f2fff8; --hotel-muted:#d0e9db;
+  --hotel-button:#2e5549; --hotel-line:#8bb6a3;
+  --nav-bg:#15212c; --hover:#2b3c49; --focus:#ffbc83;
+}
+html,body { background:var(--bg); color:var(--ink); }
+button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible { outline-color:var(--focus); }
+.header-actions { display:flex; align-items:center; gap:8px; }
+.theme-toggle { min-width:87px; font-size:12px; }
+.theme-toggle .icon { width:16px; height:16px; }
+.button,.day-tab,.event-card,.check-group,.info-card,.official-links,.journey-strip { background:var(--paper); color:var(--ink); border-color:var(--line); }
+.button:hover,.day-tab:hover { background:var(--hover); border-color:var(--muted); }
+.brand-mark { border-color:var(--green); }
+.brand-sub,.desktop-nav,.summary-text small,.section-heading .eyebrow,.small-label,.day-intro p,.day-meta,.end-time,.event-place,.event-description,.event-count,.section-description,.storage-note,.day-finish,.site-footer,.site-footer>span:first-child,.next-day small,.next-day>.icon { color:var(--muted); }
+.desktop-nav a.active,.text-link,.event-actions,.summary-icon,.heading-icon,.card-icon,.official-links .icon,.side-prepare>.icon,.kind-icon { color:var(--green); }
+.hero { background:var(--hero); }
+.hero-copy,h1 span { color:var(--hero-ink); }
+.hero .eyebrow,.hero-description,.trip-facts,.postcard-tag,.postcard-caption { color:var(--hero-muted); }
+.postcard-stamp { color:var(--hero-muted); border-color:var(--hero-muted); outline-color:var(--hero-muted); }
+.tiny-sun,.footer-flower,.countdown-summary strong { color:var(--orange); }
+.day-tab { text-align:center; transition:none; }
+.tab-day,.tab-theme,.tab-weekday { opacity:1; color:var(--muted); }
+.tab-theme { white-space:normal; line-height:1.5; min-height:1.5em; }
+.day-tab[aria-selected="true"] { background:var(--selected); color:var(--selected-ink); border-color:var(--selected); }
+.day-tab[aria-selected="true"] .tab-day,.day-tab[aria-selected="true"] .tab-theme,.day-tab[aria-selected="true"] .tab-weekday { color:var(--selected-muted); }
+.day-tab[aria-selected="true"]:after { background:var(--selected-ink); }
+.day-illustration,.filter-group,.next-day,.checklist-overview,.offline-card { background:var(--sage); color:var(--ink); }
+.day-illustration { color:var(--green); }
+.filter { color:var(--muted); }
+.filter[aria-pressed="true"] { background:var(--paper); color:var(--green); }
+.plan-note { background:var(--soft); color:var(--muted); }
+.day-warning,.notice-card,.noscript-notice { background:var(--warning-bg); color:var(--warning-ink); border-color:var(--warning-line); }
+.notice-card>.icon,.notice-card ul { color:var(--warning-ink); }
+.event:before { background:var(--line); }
+.event-dot:before { border-color:var(--green); background:var(--bg); }
+.event-time,.event-title { color:var(--ink); }
+.event-title { font-size:16px; font-weight:750; line-height:1.55; }
+.event-place { font-size:12px; line-height:1.7; }
+.event-description { font-size:12px; line-height:1.8; }
+.event-card:hover { border-color:var(--muted); }
+.event-actions { border-color:var(--line); font-size:11px; }
+.event-check { border-color:var(--muted); color:var(--muted); }
+.event-check:hover { border-color:var(--green); color:var(--green); }
+.event-check[aria-pressed="true"] { color:var(--selected-ink); background:var(--selected); border-color:var(--selected); }
+.event.completed .event-title { color:var(--muted); }
+.event.completed .event-dot:before { background:var(--green); }
+.event.is-move .event-card { background:var(--soft); border-color:var(--line); }
+.event.is-move .event-title { color:var(--ink); font-size:13px; }
+.event.is-move .event-description { color:var(--muted); font-size:11px; }
+.event.is-move .event-dot:before { border-color:var(--muted); background:var(--bg); }
+.event.is-move .event-actions { border-color:var(--line); }
+.tag { background:var(--tag-bg); color:var(--tag-ink); }
+.tag.booking,.tag.caution { background:var(--warning-bg); color:var(--warning-ink); }
+.tag.now { background:var(--selected); color:var(--selected-ink); }
+.event.is-current .event-dot:before { background:var(--orange); border-color:var(--orange); }
+.hotel-card { background:var(--hotel-bg); color:var(--hotel-ink); }
+.hotel-card .eyebrow,.hotel-card p:not(.eyebrow),.hotel-dates,.hotel-dates span { color:var(--hotel-muted); }
+.hotel-symbol { color:var(--hotel-ink); }
+.hotel-button { background:var(--hotel-button); color:var(--hotel-ink); border-color:var(--hotel-line); }
+.hotel-button:hover { background:var(--hotel-bg); color:var(--hotel-ink); border-color:var(--hotel-muted); }
+.memo-card { background:var(--soft); color:var(--ink); }
+.memo-card>.icon { color:var(--green); }
+.memo-card p,.memo-signature,.side-prepare span:not([data-icon]) { color:var(--muted); }
+.memo-card:before { border-color:var(--muted); }
+.checklist-overview span { color:var(--muted); }
+progress,progress::-webkit-progress-bar { background:var(--line); }
+progress::-webkit-progress-value { background:var(--green); }
+progress::-moz-progress-bar { background:var(--green); }
+.check-item+.check-item,.official-links a+a { border-color:var(--line); }
+.check-item input { accent-color:var(--selected); }
+.check-item:has(input:checked) span { color:var(--muted); text-decoration-color:var(--muted); }
+.offline-card>.icon { color:var(--green); }
+.mobile-nav { background:var(--nav-bg); }
+.mobile-nav a { color:var(--muted); }
+.mobile-nav a.active { color:var(--green); }
+.mobile-nav a.active:before { background:var(--green); }
+.toast,.skip-link { background:var(--selected); color:var(--selected-ink); }
+.status-dot { background:var(--green); }
+.status-dot.offline { background:var(--orange); }
+@media(max-width:760px) {
+  .header-actions { gap:6px; }
+  .theme-toggle { min-width:65px; min-height:36px; padding:8px; font-size:10px; gap:5px; }
+  .theme-toggle .icon { width:14px; height:14px; }
+  .header-share { padding:8px; }
+  .brand { font-size:14px; gap:7px; }
+  .brand-sub { font-size:5px; letter-spacing:1.4px; }
+  .site-header { gap:8px; }
+  .day-tabs { align-items:stretch; }
+  .day-tab { padding:12px 7px; }
+  .day-intro h3 { font-size:18px; }
+  .day-intro p { font-size:11px; }
+  .event-title { font-size:15px; }
+  .event-place { font-size:11px; }
+  .event-description { font-size:12px; }
+  .event.is-move .event-title { font-size:12px; }
+  .event.is-move .event-description { font-size:11px; }
+}
+@media(max-width:375px) {
+  .brand { font-size:12px; }
+  .brand-mark { width:28px; height:33px; font-size:18px; }
+  .brand-sub { font-size:4px; letter-spacing:1.2px; }
+  .header-share>span:last-child { display:none; }
+  .header-share { min-width:34px; }
+  .event-title { font-size:14px; }
+}
+@media print {
+  :root { color-scheme:light; }
+  html,body { background:white!important; color:#111!important; }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "도쿄, 우리 함께 · 가족여행",
+  "short_name": "도쿄 여행",
+  "description": "2027년 1월 4–7일 도쿄 가족여행 일정표",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f7f2",
+  "theme_color": "#214e45",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,5 @@
+# Deploy the standalone trip site, preserving the unrelated Next.js portfolio.
+[build]
+  base = "tokyo-trip"
+  publish = "."
+  command = "test -s index.html && test -s app.js && test -s theme.css && test -s sw.js"
